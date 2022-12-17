@@ -1,87 +1,92 @@
-import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
 import {
-  StyleSheet,
   Text,
   View,
-  Image,
-  Alert,
+  StyleSheet,
   TextInput,
-  TouchableOpacity,
+  ScrollView,
+  Button,
 } from "react-native";
-import axios from "axios";
-import { useState } from "react";
 
-export default function App() {
-  const [usuario, setUsuario] = useState([]);
-  const [dados, setDados] = useState([]);
+export default App = () => {
+  const [lat, setLat] = useState([]);
+  const [lon, setLon] = useState([]);
+  const [data, setData] = useState([]);
 
-  const dadosGit = async () => {
-    axios
-      .get(`https://api.github.com/users/${usuario}`)
-      .then((response) => {
-        setDados(response.data);
-      })
-      .catch((error) => {
-        Alert.alert("Erro ao pegar dados");
-      });
+  console.warn(lat);
+  const api = {
+    key: "eece90fed20d88bcadbbf7e3014f845d",
+    base: "https://api.openweathermap.org/data/2.5/",
+    lang: "pt_br",
+    units: "metric",
+    lat: -8.0945983427714,
+    long: -34.95567351669346,
   };
 
-  return (
-    <View style={styles.container}>
-      <Text>Pesquise por um usuário do GITHUB</Text>
-      <TextInput
-        label="Nome Usuario"
-        style={{
-          height: 55,
-          width: "50%",
-          backgroundColor: "#3540e6",
-          marginVertical: 20,
-          justifyContent: "center",
-          alignItems: "center",
-          borderTopRightRadius: 10,
-          borderBottomLeftRadius: 10,
-          color: "white",
-          padding: 10,
-        }}
-        placeholder="Digite o nome do usuário GIT"
-        placeholderTextColor="white"
-        onChangeText={(usuario) => setUsuario(usuario)}
-      />
-      <TouchableOpacity
-        onPress={() => dadosGit()}
-        style={{
-          height: 55,
-          width: "50%",
-          backgroundColor: "#3540e6",
-          marginVertical: 20,
-          justifyContent: "center",
-          alignItems: "center",
-          borderTopRightRadius: 10,
-          borderBottomLeftRadius: 10,
-        }}
-      >
-        <Text style={{ color: "#F6F4F3", fontWeight: "bold", fontSize: 18 }}>
-          Procurar
-        </Text>
-      </TouchableOpacity>
-      <Image
-        source={{ uri: dados.avatar_url }}
-        style={{ width: 200, height: 200 }}
-      />
-      <Text>{dados.bio}</Text>
-      <Text>Seguidores: {dados.followers}</Text>
-      <Text>Repositorios: {dados.public_repos}</Text>
-      <Text>Git: {dados.url}</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const url = `${api.base}weather?lat=${api.lat}&lon=${api.long}&lang=${api.lang}&units=${api.units}&APPID=${api.key}`;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+  const getClima = async () => {
+    try {
+      const response = await fetch(url);
+      const json = await response.json();
+      setData(json);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getClima();
+  }, []);
+
+  return (
+    <ScrollView>
+      <View>
+        <View style={{ backgroundColor: "#4682B4", height: 500 }}>
+          <Text style={{ fontSize: 30, alignSelf: "center", marginTop: 240 }}>
+            O local escolhido é:
+          </Text>
+          <Text style={{ fontSize: 30, alignSelf: "center" }}>{data.name}</Text>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            marginTop: 50,
+            alignItems: "center",
+            marginLeft: 15,
+          }}
+        >
+          <TextInput
+            placeholder="Digite a latitude"
+            onChangeText={() => setLat}
+            style={{
+              backgroundColor: "#CAE1FF",
+              width: 160,
+              height: 70,
+              marginHorizontal: 15,
+              textAlign: "center",
+            }}
+          ></TextInput>
+          <TextInput
+            placeholder="Digite a longitude"
+            onChangeText={() => setLon}
+            style={{
+              backgroundColor: "#CAE1FF",
+              width: 160,
+              height: 70,
+              textAlign: "center",
+            }}
+          ></TextInput>
+        </View>
+        <View
+          style={{ width: 337, height: 40, marginTop: 10, alignSelf: "center" }}
+        ></View>
+      </View>
+    </ScrollView>
+  );
+};
+
+export const styles = StyleSheet.create({});
